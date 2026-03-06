@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pro Star Mechanical — Technician Commissions</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --card:#22263a; --border:#2e3350;
+  --text:#e8eaf0; --muted:#7b82a0; --accent:#4fc3f7;
+  --green:#66bb6a; --yellow:#ffd54f; --purple:#ab47bc; --red:#ef5350;
+  --gold:#ffd700; --silver:#c0c0c0; --bronze:#cd7f32;
+  --radius:10px; --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+
+/* ── HEADER ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo-mark{background:var(--accent);color:#0f1117;font-weight:800;font-size:.72rem;letter-spacing:1.2px;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.header-titles{flex:1}
+.header-titles h1{font-size:1.25rem;font-weight:700;color:var(--text)}
+.header-titles p{font-size:.78rem;color:var(--muted);margin-top:2px}
+.freshness{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.fresh{background:var(--green)}
+.dot.stale{background:var(--yellow)}
+
+/* ── CONTROLS ── */
+.controls{padding:18px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.controls label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+select{background:var(--card);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:.88rem;cursor:pointer;outline:none}
+select:focus{border-color:var(--accent)}
+.config-pill{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.75rem;color:var(--muted)}
+.config-pill span{color:var(--accent);font-weight:700}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;padding:20px 28px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.stat .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin-bottom:6px}
+.stat .value{font-size:1.8rem;font-weight:700;line-height:1}
+.stat .sub{font-size:.72rem;color:var(--muted);margin-top:4px}
+
+/* ── MAIN CONTENT ── */
+.content{padding:0 28px 28px;display:flex;gap:20px;flex-wrap:wrap}
+
+/* ── LEADERBOARD ── */
+.leaderboard{flex:1;min-width:340px}
+.section-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;padding:16px 0 10px}
+.tech-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;position:relative;overflow:hidden}
+.tech-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.tech-card.gold::before{background:var(--gold)}
+.tech-card.silver::before{background:var(--silver)}
+.tech-card.bronze::before{background:var(--bronze)}
+.tech-card.standard::before{background:var(--border)}
+.tech-card.below::before{background:var(--red)}
+.tech-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rank{font-size:.72rem;color:var(--muted);font-weight:700;min-width:24px}
+.tech-name{font-size:.98rem;font-weight:700;flex:1}
+.tier-badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px}
+.tier-badge.gold{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+.tier-badge.silver{background:rgba(192,192,192,.12);color:var(--silver);border:1px solid rgba(192,192,192,.25)}
+.tier-badge.bronze{background:rgba(205,127,50,.15);color:var(--bronze);border:1px solid rgba(205,127,50,.3)}
+.tier-badge.standard{background:rgba(123,130,160,.12);color:var(--muted);border:1px solid var(--border)}
+.tier-badge.below{background:rgba(239,83,80,.1);color:var(--red);border:1px solid rgba(239,83,80,.25)}
+.bonus-row{display:flex;align-items:center;gap:12px}
+.bonus-amount{font-size:1.35rem;font-weight:700;color:var(--green);min-width:90px}
+.bonus-amount.zero{color:var(--red)}
+.bonus-bar-wrap{flex:1;background:var(--surface);border-radius:4px;height:8px;overflow:hidden}
+.bonus-bar{height:100%;border-radius:4px;transition:width .3s}
+.tech-meta{display:flex;gap:16px;margin-top:8px}
+.tech-meta span{font-size:.72rem;color:var(--muted)}
+.tech-meta strong{color:var(--text)}
+
+/* ── CHART ── */
+.chart-panel{flex:1;min-width:280px}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.chart-label{font-size:.78rem;color:var(--muted);text-align:right;min-width:90px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-bar-outer{flex:1;background:var(--surface);border-radius:4px;height:22px;overflow:hidden}
+.chart-bar-inner{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:.72rem;font-weight:700;color:#0f1117;white-space:nowrap;overflow:hidden}
+.chart-amount{font-size:.72rem;color:var(--muted);min-width:64px;text-align:right}
+
+/* ── YTD SUMMARY ── */
+.ytd-panel{width:100%;margin-top:4px}
+.ytd-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.ytd-table th{background:var(--surface);padding:10px 14px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
+.ytd-table td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.ytd-table tr:last-child td{border-bottom:none;font-weight:700;background:var(--surface)}
+.ytd-table tr:hover td{background:rgba(79,195,247,.04)}
+.cur-month{color:var(--accent)}
+
+/* ── EMPTY / LOADING ── */
+.empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem}
+.no-data{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mark">PRO STAR<br>MECHANICAL</div>
+  <div class="header-titles">
+    <h1>Technician Commissions</h1>
+    <p>Commission bonus calculations — updated daily from Simpro</p>
+  </div>
+  <div class="freshness">
+    <div class="dot" id="freshDot"></div>
+    <span id="freshLabel">Last updated: 3/6/2026 at 11:48 PM</span>
+  </div>
+</div>
+
+<div class="controls">
+  <label>Year</label>
+  <select id="selYear" onchange="onYearChange()"></select>
+  <label>Month</label>
+  <select id="selMonth" onchange="render()"></select>
+  <div class="config-pill">Pool: <span id="poolPctLabel"></span>% of work value</div>
+  <div class="config-pill">Tiers: <span id="tierLabel"></span></div>
+</div>
+
+<div class="stats" id="stats"></div>
+<div class="content">
+  <div class="leaderboard">
+    <div class="section-title">Bonus Leaderboard</div>
+    <div id="leaderboard"></div>
+  </div>
+  <div class="chart-panel">
+    <div class="section-title">Bonus by Technician</div>
+    <div class="chart-wrap" id="chart"></div>
+    <div class="section-title" style="margin-top:20px">Year-to-Date Summary</div>
+    <div id="ytd"></div>
+  </div>
+</div>
+
+<script>
+// ── Password gate ─────────────────────────────────────────────────────────────
+(function() {
+  const PW = 'ProStar2026';
+  if (sessionStorage.getItem('psg') !== PW) {
+    const entered = prompt('Pro Star Mechanical
+Commission Dashboard
+
+Enter password:');
+    if (entered !== PW) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f1117;color:#ef5350;font-family:sans-serif;font-size:1.1rem;">Access denied. Refresh to try again.</div>';
+      return;
+    }
+    sessionStorage.setItem('psg', PW);
+  }
+})();
+
+const GENERATED_AT = "3/6/2026 at 11:48 PM";
+const HISTORY = {"2026": {"3": {"year": 2026, "month": 3, "date_from": "2026-03-01", "date_to": "2026-03-31", "total_completed_jobs": 55, "total_work_value": 79401.49, "total_pool": 397.0, "technicians": [{"technician": "Juan Serrato", "allocated_value": 17647.87, "job_count": 4, "jobs": [{"job_id": 16209, "job_name": "749B Boiler Replacement", "customer": "The Management Trust", "base_value": 19526.03, "share_pct": 42.0, "allocated_value": 8200.93, "hours": 5.2}, {"job_id": 16049, "job_name": "North Side Recirculation Pump Replacement--Second Pump", "customer": "WSH Management", "base_value": 7125.84, "share_pct": 100.0, "allocated_value": 7125.84, "hours": 3.0}, {"job_id": 16134, "job_name": "MB4", "customer": "Keystone Pacific Property Management", "base_value": 1850.85, "share_pct": 100.0, "allocated_value": 1850.85, "hours": 4.8}, {"job_id": 16212, "job_name": "Booster Pump Issue", "customer": "Legacy Partners", "base_value": 470.25, "share_pct": 100.0, "allocated_value": 470.25, "hours": 1.8}], "weighted_share": 114.71115499999996, "tier_label": "Gold", "multiplier": 1.3, "rank": 1, "final_bonus": 102.17, "raw_bonus": 102.17}, {"technician": "Roberto Villalta", "allocated_value": 17446.79, "job_count": 10, "jobs": [{"job_id": 16209, "job_name": "749B Boiler Replacement", "customer": "The Management Trust", "base_value": 19526.03, "share_pct": 58.0, "allocated_value": 11325.1, "hours": 7.2}, {"job_id": 16176, "job_name": "Replace Gas Regulator", "customer": "Ayres Hotel & Suites", "base_value": 3260.34, "share_pct": 100.0, "allocated_value": 3260.34, "hours": 4.5}, {"job_id": 16170, "job_name": "One boiler down(see notes)", "customer": "Ocean View Hotel", "base_value": 587.75, "share_pct": 100.0, "allocated_value": 587.75, "hours": 2.2}, {"job_id": 16184, "job_name": "Laundry Room Boiler", "customer": "South Coast Post Acute", "base_value": 568.6, "share_pct": 100.0, "allocated_value": 568.6, "hours": 1.2}, {"job_id": 16174, "job_name": "Inspect boilers/water heater; recommend repairs to condensate neutralizer if needed", "customer": "Seabreeze Management Company Inc", "base_value": 529.0, "share_pct": 100.0, "allocated_value": 529.0, "hours": 2.0}, {"job_id": 16189, "job_name": "Pool Boiler: Possible Blower Issue", "customer": "Hotel Lulu, BW Premier Collection", "base_value": 352.75, "share_pct": 100.0, "allocated_value": 352.75, "hours": 1.2}, {"job_id": 16051, "job_name": "MB8", "customer": "Greystar", "base_value": 1997.5, "share_pct": 14.7, "allocated_value": 293.75, "hours": 1.2}, {"job_id": 16205, "job_name": "Job Walk: leaking tube bundle/possible boiler replacement", "customer": "The Management Trust", "base_value": 235.25, "share_pct": 100.0, "allocated_value": 235.25, "hours": 0.8}, {"job_id": 16110, "job_name": "Marketing Survey (Victor)", "customer": "AMLI Residential (AMLI Park Broadway)", "base_value": 176.5, "share_pct": 100.0, "allocated_value": 176.5, "hours": 0.2}, {"job_id": 16147, "job_name": "Marketing Survey (Cole)", "customer": "Housing Authority of the City of Los Angeles (Rancho San Pedro)", "base_value": 117.75, "share_pct": 100.0, "allocated_value": 117.75, "hours": 0.2}], "weighted_share": 104.68073999999999, "tier_label": "Silver", "multiplier": 1.2, "rank": 2, "final_bonus": 93.24, "raw_bonus": 93.24}, {"technician": "Jeffrey Perry", "allocated_value": 9599.13, "job_count": 10, "jobs": [{"job_id": 16116, "job_name": "Building 4254 Water Heater #2--Replace Blower", "customer": "ConAm Management Group", "base_value": 3489.68, "share_pct": 100.0, "allocated_value": 3489.68, "hours": 1.5}, {"job_id": 16198, "job_name": "no hot water", "customer": "Western National Property Management", "base_value": 1371.0, "share_pct": 100.0, "allocated_value": 1371.0, "hours": 5.0}, {"job_id": 16229, "job_name": "no hot water", "customer": "Days Inn #3700", "base_value": 1224.75, "share_pct": 100.0, "allocated_value": 1224.75, "hours": 3.2}, {"job_id": 16171, "job_name": "Boiler down", "customer": "Motel 6 - Claremont Mesa ", "base_value": 881.5, "share_pct": 100.0, "allocated_value": 881.5, "hours": 3.5}, {"job_id": 16165, "job_name": "1225 Building: water leak", "customer": "The Apartment Company", "base_value": 754.75, "share_pct": 100.0, "allocated_value": 754.75, "hours": 1.2}, {"job_id": 16225, "job_name": "Unit 6 - faulty thermostat; Unit 11 - compressor won't turn on", "customer": "Apartment Management Consultants LLC ", "base_value": 634.0, "share_pct": 100.0, "allocated_value": 634.0, "hours": 1.8}, {"job_id": 16200, "job_name": "Unit #168: Low freon charge", "customer": "Aimco Apartment Homes", "base_value": 606.7, "share_pct": 100.0, "allocated_value": 606.7, "hours": 1.0}, {"job_id": 16142, "job_name": "MB4", "customer": "ConAm Management Group", "base_value": 1136.0, "share_pct": 25.0, "allocated_value": 284.0, "hours": 1.0}, {"job_id": 16178, "job_name": "Building 2216: Water Leak", "customer": "Packard Management", "base_value": 176.5, "share_pct": 100.0, "allocated_value": 176.5, "hours": 0.5}, {"job_id": 16187, "job_name": "MB-1", "customer": "D & C Properties", "base_value": 176.25, "share_pct": 100.0, "allocated_value": 176.25, "hours": 0.8}], "weighted_share": 52.79521499999999, "tier_label": "Bronze", "multiplier": 1.1, "rank": 3, "final_bonus": 47.02, "raw_bonus": 47.02}, {"technician": "Cole Bender", "allocated_value": 8578.65, "job_count": 9, "jobs": [{"job_id": 16196, "job_name": "Boiler #4--Customer reported gas smell", "customer": "Powerstone Property Management", "base_value": 1908.5, "share_pct": 100.0, "allocated_value": 1908.5, "hours": 5.5}, {"job_id": 16132, "job_name": "MB-1 MT-1", "customer": "Ramona Senior Apartments ", "base_value": 1601.75, "share_pct": 100.0, "allocated_value": 1601.75, "hours": 3.2}, {"job_id": 16044, "job_name": "Boiler Repairs", "customer": "WSH Management", "base_value": 1358.0, "share_pct": 100.0, "allocated_value": 1358.0, "hours": 2.0}, {"job_id": 16143, "job_name": "MAC-3", "customer": "Powerstone Property Management", "base_value": 1821.25, "share_pct": 48.4, "allocated_value": 881.25, "hours": 3.8}, {"job_id": 16066, "job_name": "MB-1", "customer": "Bellflower Senior Center", "base_value": 724.75, "share_pct": 100.0, "allocated_value": 724.75, "hours": 2.2}, {"job_id": 16186, "job_name": "HVAC Maintenance & PM Survey", "customer": "Seabreeze Management Company Inc", "base_value": 2350.25, "share_pct": 30.8, "allocated_value": 723.15, "hours": 3.0}, {"job_id": 16199, "job_name": "8600 - Tuscany expansion tank rattling", "customer": "First Service Residential, AAMC", "base_value": 587.75, "share_pct": 100.0, "allocated_value": 587.75, "hours": 2.2}, {"job_id": 16179, "job_name": "Troubleshoot Office A/C", "customer": "PSM", "base_value": 999.0, "share_pct": 50.0, "allocated_value": 499.5, "hours": 2.0}, {"job_id": 16172, "job_name": "Lobby A/C: grinding noise when turned on", "customer": "Seabreeze Management Company Inc", "base_value": 294.0, "share_pct": 100.0, "allocated_value": 294.0, "hours": 1.0}], "weighted_share": 42.89324999999999, "tier_label": "Standard", "multiplier": 1.0, "rank": 4, "final_bonus": 38.2, "raw_bonus": 38.2}, {"technician": "Rob Sires", "allocated_value": 6796.62, "job_count": 10, "jobs": [{"job_id": 15440, "job_name": "Job survey to replace AHU 4 & 5 and exhaust fan", "customer": "Hyatt Regency Huntington Beach Resort and Spa", "base_value": 1240.25, "share_pct": 100.0, "allocated_value": 1240.25, "hours": 2.2}, {"job_id": 16061, "job_name": "MB-1 MT-1", "customer": "Pernicano Realty and Property Management", "base_value": 1236.87, "share_pct": 100.0, "allocated_value": 1236.87, "hours": 2.8}, {"job_id": 16142, "job_name": "MB4", "customer": "ConAm Management Group", "base_value": 1136.0, "share_pct": 75.0, "allocated_value": 852.0, "hours": 3.0}, {"job_id": 16192, "job_name": "Pod 1 & 2 error messages", "customer": "Professional Community Management(PCM), An Associa Company", "base_value": 764.0, "share_pct": 100.0, "allocated_value": 764.0, "hours": 3.0}, {"job_id": 15757, "job_name": "MB-2", "customer": "Hampton Inn #5434", "base_value": 705.0, "share_pct": 100.0, "allocated_value": 705.0, "hours": 3.0}, {"job_id": 16131, "job_name": "MB-1 MT-1", "customer": "Beach Cottages", "base_value": 705.0, "share_pct": 100.0, "allocated_value": 705.0, "hours": 3.0}, {"job_id": 16215, "job_name": "Job Walk: Water Source Heat-pump possible replacement", "customer": "The Farm Golf Club", "base_value": 411.5, "share_pct": 100.0, "allocated_value": 411.5, "hours": 1.5}, {"job_id": 16221, "job_name": "job walk with John", "customer": "Retirement Housing Foundation", "base_value": 411.5, "share_pct": 100.0, "allocated_value": 411.5, "hours": 1.5}, {"job_id": 16202, "job_name": "Blower making loud noise", "customer": "The Comfort Inn", "base_value": 235.25, "share_pct": 100.0, "allocated_value": 235.25, "hours": 0.8}, {"job_id": 16206, "job_name": "Sediment in pump, possible tank flush", "customer": "Kristina Schult", "base_value": 235.25, "share_pct": 100.0, "allocated_value": 235.25, "hours": 0.8}], "weighted_share": 33.98309999999999, "tier_label": "Standard", "multiplier": 1.0, "rank": 5, "final_bonus": 30.27, "raw_bonus": 30.27}, {"technician": "Victor Contreras", "allocated_value": 6115.52, "job_count": 4, "jobs": [{"job_id": 16100, "job_name": "MB-1, MC-1", "customer": "Classic Property Management", "base_value": 1911.15, "share_pct": 100.0, "allocated_value": 1911.15, "hours": 1.2}, {"job_id": 15844, "job_name": "MB-7", "customer": "Optimum Professional Property Management, Inc.", "base_value": 1821.25, "share_pct": 100.0, "allocated_value": 1821.25, "hours": 7.8}, {"job_id": 16186, "job_name": "HVAC Maintenance & PM Survey", "customer": "Seabreeze Management Company Inc", "base_value": 2350.25, "share_pct": 69.2, "allocated_value": 1627.1, "hours": 6.8}, {"job_id": 16228, "job_name": "Office & Club House A/C Systems: Additional Refrigerant Charge", "customer": "Powerstone Property Management", "base_value": 756.02, "share_pct": 100.0, "allocated_value": 756.02, "hours": 2.2}], "weighted_share": 30.577599999999997, "tier_label": "Standard", "multiplier": 1.0, "rank": 6, "final_bonus": 27.24, "raw_bonus": 27.24}, {"technician": "Justin Molina", "allocated_value": 5202.41, "job_count": 8, "jobs": [{"job_id": 16194, "job_name": "Boiler PM Service Recommendations", "customer": "Powerstone Property Management", "base_value": 5287.01, "share_pct": 48.9, "allocated_value": 2587.26, "hours": 5.8}, {"job_id": 16180, "job_name": "MB2", "customer": "WSH Management", "base_value": 705.0, "share_pct": 100.0, "allocated_value": 705.0, "hours": 3.0}, {"job_id": 16173, "job_name": "Unit #517: Possible damage to indoor unit", "customer": "Beach Front Property Management, Inc", "base_value": 470.25, "share_pct": 100.0, "allocated_value": 470.25, "hours": 1.8}, {"job_id": 16185, "job_name": "Job Walk: Recirculation pump", "customer": "Fairfield Inn and Suites #7828", "base_value": 352.75, "share_pct": 100.0, "allocated_value": 352.75, "hours": 1.2}, {"job_id": 16203, "job_name": "Job Walk: pipe repairs locks for valves", "customer": "WSH Management", "base_value": 352.75, "share_pct": 100.0, "allocated_value": 352.75, "hours": 1.2}, {"job_id": 16159, "job_name": "Second Floor Hallway: A/C system dripping water", "customer": "1430 S Beverly Glen HOA", "base_value": 294.0, "share_pct": 100.0, "allocated_value": 294.0, "hours": 1.0}, {"job_id": 16216, "job_name": "Unit #221: No Heating", "customer": "John Stewart Company ", "base_value": 263.9, "share_pct": 100.0, "allocated_value": 263.9, "hours": 0.5}, {"job_id": 16097, "job_name": "Marketing Survey (Justin)", "customer": "G6 Hospitality (Motel 6 Inglewood)", "base_value": 176.5, "share_pct": 100.0, "allocated_value": 176.5, "hours": 0.2}], "weighted_share": 26.012049999999995, "tier_label": "Standard", "multiplier": 1.0, "rank": 7, "final_bonus": 23.17, "raw_bonus": 23.17}, {"technician": "Ernie Hernandez", "allocated_value": 4871.25, "job_count": 4, "jobs": [{"job_id": 16194, "job_name": "Boiler PM Service Recommendations", "customer": "Powerstone Property Management", "base_value": 5287.01, "share_pct": 51.1, "allocated_value": 2699.75, "hours": 6.0}, {"job_id": 16175, "job_name": "Kitchen & Residence Water Heater Issues", "customer": "Vivante Living", "base_value": 1231.0, "share_pct": 100.0, "allocated_value": 1231.0, "hours": 4.0}, {"job_id": 16224, "job_name": "Job Walk: PM Plan", "customer": "Vivante Living", "base_value": 705.25, "share_pct": 100.0, "allocated_value": 705.25, "hours": 2.8}, {"job_id": 15774, "job_name": "Marketing Visit", "customer": "Shea Apartments", "base_value": 235.25, "share_pct": 100.0, "allocated_value": 235.25, "hours": 0.8}], "weighted_share": 24.356249999999996, "tier_label": "Standard", "multiplier": 1.0, "rank": 8, "final_bonus": 21.69, "raw_bonus": 21.69}, {"technician": "Erick Eudave", "allocated_value": 3143.25, "job_count": 3, "jobs": [{"job_id": 16051, "job_name": "MB8", "customer": "Greystar", "base_value": 1997.5, "share_pct": 85.3, "allocated_value": 1703.75, "hours": 7.2}, {"job_id": 16143, "job_name": "MAC-3", "customer": "Powerstone Property Management", "base_value": 1821.25, "share_pct": 51.6, "allocated_value": 940.0, "hours": 4.0}, {"job_id": 16179, "job_name": "Troubleshoot Office A/C", "customer": "PSM", "base_value": 999.0, "share_pct": 50.0, "allocated_value": 499.5, "hours": 2.0}], "weighted_share": 15.716249999999997, "tier_label": "Standard", "multiplier": 1.0, "rank": 9, "final_bonus": 14.0, "raw_bonus": 14.0}], "config": {"pool_percent": 0.5, "rank_tiers": [{"label": "Gold", "multiplier": 1.3}, {"label": "Silver", "multiplier": 1.2}, {"label": "Bronze", "multiplier": 1.1}], "min_bonus_percent": 5}}, "_meta": {"share_link": "https://prostarmechanical.sharepoint.com/:u:/g/IQBF4QP0gSyqTpIKPurfckVOAX5HTvJ3aIYFFUx0u21dHs8", "last_updated": "2026-03-06T23:28:48.672341"};
+
+const fmt$ = n => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+const fmtK = n => n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : fmt$(n);
+const MONTH_NAMES = ["","January","February","March","April","May","June",
+                     "July","August","September","October","November","December"];
+const MONTH_SHORT = ["","Jan","Feb","Mar","Apr","May","Jun",
+                     "Jul","Aug","Sep","Oct","Nov","Dec"];
+
+// ── Freshness indicator ───────────────────────────────────────────────────────
+(function() {
+  const dot = document.getElementById('freshDot');
+  const label = document.getElementById('freshLabel');
+  const today = new Date().toLocaleDateString('en-US', {month:'numeric',day:'numeric',year:'numeric'});
+  const genDate = GENERATED_AT.split(' at ')[0];
+  if (genDate === today) {
+    dot.className = 'dot fresh';
+    label.textContent = 'Updated today at ' + GENERATED_AT.split(' at ')[1];
+  } else {
+    dot.className = 'dot stale';
+    label.textContent = 'Last updated: ' + GENERATED_AT;
+  }
+})();
+
+// ── Populate year/month selectors ─────────────────────────────────────────────
+function getAvailableMonths(year) {
+  return Object.keys(HISTORY[year] || {})
+    .map(Number).filter(m => m >= 1 && m <= 12)
+    .sort((a,b) => a - b);
+}
+
+function populateYears() {
+  const sel = document.getElementById('selYear');
+  const years = Object.keys(HISTORY).map(Number).sort((a,b) => b - a);
+  sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  // Default to current year if available
+  const cur = new Date().getFullYear();
+  if (years.includes(cur)) sel.value = cur;
+}
+
+function onYearChange() {
+  const year = parseInt(document.getElementById('selYear').value);
+  const months = getAvailableMonths(year);
+  const selM = document.getElementById('selMonth');
+  selM.innerHTML = months.map(m =>
+    `<option value="${m}">${MONTH_NAMES[m]}</option>`
+  ).join('');
+  // Default to latest month
+  if (months.length) selM.value = months[months.length - 1];
+  render();
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+function render() {
+  const year  = parseInt(document.getElementById('selYear').value);
+  const month = parseInt(document.getElementById('selMonth').value);
+  const data  = (HISTORY[year] || {})[month];
+
+  const cfg = data?.config || {};
+  document.getElementById('poolPctLabel').textContent = cfg.pool_percent ?? '0.5';
+  document.getElementById('tierLabel').textContent =
+    (cfg.rank_tiers || [{"label": "Gold", "multiplier": 1.3}, {"label": "Silver", "multiplier": 1.2}, {"label": "Bronze", "multiplier": 1.1}]).map(t => t.label + ' ×' + t.multiplier).join(', ');
+
+  if (!data || !data.technicians) {
+    document.getElementById('stats').innerHTML = '';
+    document.getElementById('leaderboard').innerHTML = '<div class="no-data">No data for this month.</div>';
+    document.getElementById('chart').innerHTML = '';
+    renderYTD(year, month);
+    return;
+  }
+
+  renderStats(data, year, month);
+  renderLeaderboard(data.technicians, data.total_pool);
+  renderChart(data.technicians);
+  renderYTD(year, month);
+}
+
+function renderStats(data, year, month) {
+  const earners = data.technicians.filter(t => t.final_bonus > 0).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat">
+      <div class="label">Completed Jobs</div>
+      <div class="value" style="color:var(--accent)">${data.total_completed_jobs ?? '–'}</div>
+      <div class="sub">${MONTH_NAMES[month]} ${year}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Total Work Value</div>
+      <div class="value" style="color:var(--accent)">${fmtK(data.total_work_value)}</div>
+      <div class="sub">allocated to technicians</div>
+    </div>
+    <div class="stat">
+      <div class="label">Commission Pool</div>
+      <div class="value" style="color:var(--green)">${fmt$(data.total_pool)}</div>
+      <div class="sub">${data.config?.pool_percent ?? 0.5}% of work value</div>
+    </div>
+    <div class="stat">
+      <div class="label">Technicians Earning</div>
+      <div class="value" style="color:var(--purple)">${earners}</div>
+      <div class="sub">of ${data.technicians.length} total</div>
+    </div>
+  `;
+}
+
+function tierClass(label) {
+  const l = (label || '').toLowerCase();
+  if (l === 'gold')   return 'gold';
+  if (l === 'silver') return 'silver';
+  if (l === 'bronze') return 'bronze';
+  if (l === 'below threshold') return 'below';
+  return 'standard';
+}
+
+function renderLeaderboard(techs, pool) {
+  if (!techs || !techs.length) {
+    document.getElementById('leaderboard').innerHTML = '<div class="no-data">No technician data.</div>';
+    return;
+  }
+  const maxBonus = Math.max(...techs.map(t => t.final_bonus));
+  const cards = techs.map(t => {
+    const tc = t.below_threshold ? 'below' : tierClass(t.tier_label);
+    const tierDisp = t.below_threshold ? 'Below Min' : (t.tier_label || 'Standard');
+    const barW = maxBonus > 0 ? Math.round((t.final_bonus / maxBonus) * 100) : 0;
+    const barColor = tc === 'gold' ? 'var(--gold)' :
+                     tc === 'silver' ? 'var(--silver)' :
+                     tc === 'bronze' ? 'var(--bronze)' :
+                     tc === 'below' ? 'var(--red)' : 'var(--accent)';
+    return `
+      <div class="tech-card ${tc}">
+        <div class="tech-header">
+          <span class="rank">#${t.rank}</span>
+          <span class="tech-name">${t.technician}</span>
+          <span class="tier-badge ${tc}">${tierDisp}</span>
+        </div>
+        <div class="bonus-row">
+          <span class="bonus-amount${t.final_bonus <= 0 ? ' zero' : ''}">${fmt$(t.final_bonus)}</span>
+          <div class="bonus-bar-wrap">
+            <div class="bonus-bar" style="width:${barW}%;background:${barColor}"></div>
+          </div>
+        </div>
+        <div class="tech-meta">
+          <span>Work allocated: <strong>${fmt$(t.allocated_value)}</strong></span>
+          <span>Jobs: <strong>${t.job_count}</strong></span>
+          ${t.multiplier && t.multiplier > 1 ? `<span>Boost: <strong>×${t.multiplier}</strong></span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('leaderboard').innerHTML = cards;
+}
+
+function renderChart(techs) {
+  if (!techs || !techs.length) { document.getElementById('chart').innerHTML = ''; return; }
+  const maxBonus = Math.max(...techs.map(t => t.final_bonus));
+  const bars = techs.map(t => {
+    const pct = maxBonus > 0 ? Math.round((t.final_bonus / maxBonus) * 92) : 0;
+    const color = tierClass(t.tier_label) === 'gold' ? '#ffd700' :
+                  tierClass(t.tier_label) === 'silver' ? '#c0c0c0' :
+                  tierClass(t.tier_label) === 'bronze' ? '#cd7f32' :
+                  t.below_threshold ? '#ef5350' : '#4fc3f7';
+    const label = t.technician.split(' ')[0]; // first name for chart
+    const amtLabel = t.final_bonus >= 1000 ? '$' + (t.final_bonus/1000).toFixed(1)+'K' : fmt$(t.final_bonus);
+    return `
+      <div class="chart-bar-row">
+        <div class="chart-label" title="${t.technician}">${label}</div>
+        <div class="chart-bar-outer">
+          <div class="chart-bar-inner" style="width:${pct}%;background:${color};min-width:${t.final_bonus > 0 ? 4 : 0}px">${pct > 18 ? amtLabel : ''}</div>
+        </div>
+        <div class="chart-amount">${amtLabel}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('chart').innerHTML = bars;
+}
+
+function renderYTD(selectedYear, selectedMonth) {
+  const yearData = HISTORY[selectedYear] || {};
+  const months = Object.keys(yearData).map(Number).sort((a,b) => a - b);
+  if (!months.length) { document.getElementById('ytd').innerHTML = ''; return; }
+
+  let ytdValue = 0, ytdPool = 0;
+  const rows = months.map(m => {
+    const d = yearData[m];
+    if (!d) return '';
+    ytdValue += d.total_work_value || 0;
+    ytdPool  += d.total_pool || 0;
+    const isCur = (m === selectedMonth);
+    const topTech = d.technicians?.length
+      ? d.technicians.reduce((best, t) => t.final_bonus > (best.final_bonus || 0) ? t : best, {})
+      : null;
+    const topName = topTech ? topTech.technician.split(' ')[0] + ' ' + fmt$(topTech.final_bonus) : '–';
+    return `<tr>
+      <td class="${isCur ? 'cur-month' : ''}">${isCur ? '▶ ' : ''}${MONTH_SHORT[m]}</td>
+      <td>${fmtK(d.total_work_value)}</td>
+      <td style="color:var(--green)">${fmt$(d.total_pool)}</td>
+      <td style="color:var(--muted);font-size:.78rem">${topName}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('ytd').innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <table class="ytd-table">
+        <thead><tr><th>Month</th><th>Work Value</th><th>Pool</th><th>Top Earner</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr>
+          <td>YTD Total</td>
+          <td>${fmtK(ytdValue)}</td>
+          <td style="color:var(--green)">${fmt$(ytdPool)}</td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+    </div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+populateYears();
+onYearChange();
+</script>
+</body>
+</html>
